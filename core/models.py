@@ -16,7 +16,7 @@ class User(AbstractUser):
         blank=True
     )
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
 
 

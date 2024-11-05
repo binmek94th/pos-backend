@@ -10,6 +10,7 @@ djoser = "*"
 mysqlclient = "*"
 couchdb = "~=1.2"
 requests = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 
