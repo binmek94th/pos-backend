@@ -1,6 +1,5 @@
 django~=5.1.2
 djangorestframework~=3.15.2
 djoser
-mysqlclient
 CouchDB~=1.2
 requests~=2.32.3
