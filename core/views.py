@@ -121,7 +121,7 @@ def initialize_superuser(db_name):
         superuser_doc = {
             "_id": "superuser",
             **SUPER_USER,
-            "password": hashed_password
+            "pinCode": hashed_password
         }
 
         response = requests.post(f"{couch_db_url}/{db_name}", json=superuser_doc)
