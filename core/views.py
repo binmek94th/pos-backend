@@ -96,7 +96,7 @@ def initialize_permissions(db_name):
 
 
 SUPER_USER = {
-    "_id": f"{uuid4()}",
+    "_id": f"user{uuid4()}",
     "name": "Super User",
     "is_active": True,
     "type": "user",
