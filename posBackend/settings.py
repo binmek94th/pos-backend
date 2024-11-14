@@ -145,3 +145,8 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+import os
+
+# Path to store collected static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
