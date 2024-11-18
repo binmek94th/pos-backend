@@ -1,11 +1,10 @@
-version: '3'
+version: "3.9"
 services:
-  couchserver:
-    image: couchdb
+  web:
+    build: .
     ports:
-      - "5984:5984"
-    environment:
-      - COUCHDB_USER=admin
-      - COUCHDB_PASSWORD=TsaVu!+H1{_~8%xhCOUI1%
+      - "8000:8000"
     volumes:
-      - ./dbdata:/opt/couchdb/data
+      - .:/app
+    environment:
+      DJANGO_SETTINGS_MODULE: "posBackend.settings"

@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-a+yx&5qj87_(@$#zy&5s*#futs@-oh)r=q-x+e78z5-==2y+mi'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['206.189.246.185']
+ALLOWED_HOSTS = ['206.189.246.185', 'localhost']
 
 
 # Application definition
@@ -116,6 +116,12 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
 }
 
+DJOSER = {
+    'SERIALIZERS': {
+        'user_create': 'core.serializers.UserSerializer',
+    }
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -148,5 +154,4 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 import os
 
-# Path to store collected static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

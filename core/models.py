@@ -4,23 +4,8 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 
 
 class User(AbstractUser):
-    groups = models.ManyToManyField(
-        Group,
-        related_name='custom_user_set',
-        blank=True
-    )
-    user_permissions = models.ManyToManyField(
-        Permission,
-        related_name='custom_user_permissions',
-        blank=True
-    )
-
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = []
-
-
-    def __str__(self):
-        return self.email
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    company = models.ForeignKey('Company', on_delete=models.CASCADE, null=True, blank=True)
 
 
 class Type(models.TextChoices):
@@ -34,3 +19,6 @@ class Company(models.Model):
     database_user = models.CharField(max_length=255)
     database_password = models.CharField(max_length=255)
     type = models.CharField(max_length=255, choices=Type.choices)
+
+    def __str__(self):
+        return self.name
