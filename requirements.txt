@@ -5,3 +5,5 @@ CouchDB~=1.2
 requests~=2.32.3
 django-cors-headers
 bcrypt
+gunicorn==20.1.0
+python-dotenv
