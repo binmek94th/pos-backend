@@ -3,14 +3,9 @@ import string
 import re
 import requests
 import couchdb
-import os
-from dotenv import load_dotenv
+from posBackend.settings import COUCHDB_URL
 
-load_dotenv()
-
-couchdb_url = os.getenv('COUCHDB_URL')
-
-server = couchdb.Server(couchdb_url)
+server = COUCHDB_URL
 
 
 def sanitize_database_name(name):

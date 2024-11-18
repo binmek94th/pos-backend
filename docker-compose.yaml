@@ -7,4 +7,6 @@ services:
     volumes:
       - .:/app
     environment:
-      DJANGO_SETTINGS_MODULE: "posBackend.settings"
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
+    env_file:
+      - .env
