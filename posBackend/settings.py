@@ -156,5 +156,7 @@ import os
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-COUCHDB_URL = os.getenv('COUCHDB_URL', 'http://admin:secret@localhost:5984/')
 
+COUCHDB_URL = os.getenv('COUCHDB_URL', 'http://admin:YUttrDUIIFHxcgjMGmWQnkp@159.65.52.48:5984/')
+ADMIN_USER = os.getenv('ADMIN_USER', 'admin')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'YUttrDUIIFHxcgjMGmWQnkp')

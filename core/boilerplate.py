@@ -1,7 +1,7 @@
 import requests
 from uuid import uuid4
 import bcrypt
-
+from django.conf import settings
 
 initial_permissions = [
     {'name': 'Location', 'type': 'permission', 'is_active': False, 'permission_id': 1},
@@ -20,21 +20,15 @@ initial_permissions = [
     {'name': 'Account', 'type': 'permission', 'is_active': False, 'permission_id': 14},
 ]
 
+COUCHDB_URL = settings.COUCHDB_URL
+
 
 def initialize_permissions(db_name):
-    couch_db_url = "http://admin:secret@localhost:5984/"
-
-    response = requests.get(f"{couch_db_url}/{db_name}")
-    if response.status_code == 404:
-        response = requests.put(f"{couch_db_url}/{db_name}")
-        if response.status_code != 201:
-            raise Exception("Error creating CouchDB database")
-
     bulk_data = [
         {**permission, '_id': f"permission_{uuid4()}"} for permission in initial_permissions
     ]
 
-    response = requests.post(f"{couch_db_url}/{db_name}/_bulk_docs", json={"docs": bulk_data})
+    response = requests.post(f"{COUCHDB_URL}{db_name}/_bulk_docs", json={"docs": bulk_data})
     if response.status_code != 201:
         raise Exception(f"Error creating permission documents: {response.text}")
 
@@ -51,29 +45,22 @@ SUPER_USER = {
 
 
 def hash_password(password: str) -> str:
-
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed_password.decode('utf-8')
 
 
 def initialize_superuser(db_name):
-    couch_db_url = "http://admin:secret@localhost:5984/"
+    hashed_password = hash_password(SUPER_USER["password"])
 
-    response = requests.get(f"{couch_db_url}/{db_name}/superuser")
-    if response.status_code == 404:
-        hashed_password = hash_password(SUPER_USER["password"])
+    superuser_doc = {
+        "_id": "superuser",
+        **SUPER_USER,
+        "pinCode": hashed_password
+    }
 
-        superuser_doc = {
-            "_id": "superuser",
-            **SUPER_USER,
-            "pinCode": hashed_password
-        }
+    response = requests.post(f"{COUCHDB_URL}{db_name}", json=superuser_doc)
+    if response.status_code != 201:
+        raise Exception(f"Error creating superuser document: {response.text}")
 
-        response = requests.post(f"{couch_db_url}/{db_name}", json=superuser_doc)
-        if response.status_code != 201:
-            raise Exception(f"Error creating superuser document: {response.text}")
-
-        print("Superuser initialized in CouchDB.")
-    else:
-        print("Superuser already exists in CouchDB.")
+    print("Superuser initialized in CouchDB.")

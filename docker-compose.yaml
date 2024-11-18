@@ -4,9 +4,9 @@ services:
     build: .
     ports:
       - "8000:8000"
-    volumes:
-      - .:/app
-    environment:
-      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
     env_file:
       - .env
+    environment:
+      - COUCHDB_URL=${COUCHDB_URL}
+      - ADMIN_USER=${ADMIN_USER}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
