@@ -5,7 +5,7 @@ import requests
 import couchdb
 from posBackend.settings import COUCHDB_URL
 
-server = COUCHDB_URL
+server = couchdb.Server(COUCHDB_URL)
 
 
 def sanitize_database_name(name):
