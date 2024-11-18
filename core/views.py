@@ -1,7 +1,6 @@
 from django.db import transaction
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
-
 from core.boilerplate import initialize_superuser, initialize_permissions
 from core.models import Company, User
 from core.permission import IsSuperUser
@@ -34,25 +33,23 @@ class CompanyViewSet(ModelViewSet):
     @transaction.atomic
     def perform_create(self, serializer):
         if serializer.is_valid():
-            if serializer.validated_data['type'] == 'on_premise':
-                pass
+            if serializer.validated_data['type'] == 'on_online':
+                raw_database_name = serializer.validated_data['name']
+                database_name = sanitize_database_name(raw_database_name)
+                database_user = f'{database_name}_user'
+                database_password = generate_secure_password()
 
-            raw_database_name = serializer.validated_data['name']
-            database_name = sanitize_database_name(raw_database_name)
-            database_user = f'{database_name}_user'
-            database_password = generate_secure_password()
+                company_instance = serializer.save()
 
-            company_instance = serializer.save()
+                company_instance.database_name = database_name
+                company_instance.database_user = database_user
+                company_instance.database_password = database_password
+                company_instance.save()
 
-            company_instance.database_name = database_name
-            company_instance.database_user = database_user
-            company_instance.database_password = database_password
-            company_instance.save()
-
-            if create_couchdb_database(database_name, database_user):
-                create_couchdb_user(database_user, database_password)
-                initialize_permissions(company_instance.database_name)
-                initialize_superuser(company_instance.database_name)
+                if create_couchdb_database(database_name, database_user):
+                    create_couchdb_user(database_user, database_password)
+                    initialize_permissions(company_instance.database_name)
+                    initialize_superuser(company_instance.database_name)
 
     def perform_destroy(self, instance):
         database_name = sanitize_database_name(instance.name)
@@ -64,6 +61,8 @@ class CompanyViewSet(ModelViewSet):
         if serializer.is_valid():
             company_instance = serializer.save()
             database_name = sanitize_database_name(company_instance.name)
+            company_instance.name = database_name
+            company_instance.save()
             database_user = company_instance.database_user
             database_password = company_instance.database_password
             create_couchdb_user(database_user, database_password)
