@@ -54,7 +54,6 @@ def initialize_superuser(db_name):
     hashed_password = hash_password(SUPER_USER["password"])
 
     superuser_doc = {
-        "_id": "superuser",
         **SUPER_USER,
         "pinCode": hashed_password
     }
