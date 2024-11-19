@@ -7,4 +7,4 @@ django-cors-headers
 bcrypt
 gunicorn==22.0.0
 python-dotenv
-django-
+django
