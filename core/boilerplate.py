@@ -22,6 +22,7 @@ initial_permissions = [
     {'name': 'Inventory_movement', 'type': 'permission', 'is_active': False, 'permission_id': 16},
     {'name': 'Inventory_category', 'type': 'permission', 'is_active': False, 'permission_id': 17},
     {'name': 'Inventory_product', 'type': 'permission', 'is_active': False, 'permission_id': 18},
+    {'name': 'Printer', 'type': 'permission', 'is_active': False, 'permission_id': 19},
 ]
 
 COUCHDB_URL = settings.COUCHDB_URL
