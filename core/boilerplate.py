@@ -17,7 +17,10 @@ initial_permissions = [
     {'name': 'Entity_category', 'type': 'permission', 'is_active': False, 'permission_id': 11},
     {'name': 'Entity', 'type': 'permission', 'is_active': False, 'permission_id': 12},
     {'name': 'Customer', 'type': 'permission', 'is_active': False, 'permission_id': 13},
-    {'name': 'Account', 'type': 'permission', 'is_active': False, 'permission_id': 14},
+    {'name': 'Permission_group', 'type': 'permission', 'is_active': False, 'permission_id': 14},
+    {'name': 'Inventory_movement', 'type': 'permission', 'is_active': False, 'permission_id': 15},
+    {'name': 'Inventory_category', 'type': 'permission', 'is_active': False, 'permission_id': 16},
+    {'name': 'Inventory_product', 'type': 'permission', 'is_active': False, 'permission_id': 16},
 ]
 
 COUCHDB_URL = settings.COUCHDB_URL
