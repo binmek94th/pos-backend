@@ -14,7 +14,7 @@ def sanitize_database_name(name):
 
 
 def generate_secure_password(length=12):
-    characters = string.ascii_letters + string.digits + string.punctuation
+    characters = string.ascii_letters
     return ''.join(secrets.choice(characters) for _ in range(length))
 
 
