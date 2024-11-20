@@ -46,6 +46,7 @@ SUPER_USER = {
     "is_active": True,
     "type": "user",
     "password": "12345",
+    "admin": True,
 }
 
 
