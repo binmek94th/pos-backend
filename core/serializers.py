@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from core.models import Company, User
+from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -9,14 +10,16 @@ class CompanySerializer(serializers.ModelSerializer):
         read_only_fields = ['database_user', 'database_password']
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['password', 'username', 'email', 'first_name', 'last_name', 'company']
-        read_only_fields = ['company']
-        extra_kwargs = {
-            'password': {'write_only': True},
-        }
+class UserSerializer(BaseUserCreateSerializer):
+    class Meta(BaseUserCreateSerializer.Meta):
+        fields = ('id', 'email', 'username',
+                  'first_name', 'last_name', 'password')
+
+
+class UserAdminSerializer(BaseUserCreateSerializer):
+    class Meta(BaseUserCreateSerializer.Meta):
+        fields = ('id', 'email', 'username',
+                  'first_name', 'last_name', 'company')
 
 
 class AdminUserSerializer(serializers.ModelSerializer):
@@ -24,3 +27,4 @@ class AdminUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'password', 'username', 'email', 'first_name', 'last_name', 'company']
         read_only_fields = ['password']
+
