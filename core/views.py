@@ -1,6 +1,10 @@
+import os
+
 from django.contrib.sites import requests
 from django.db import transaction
 from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,7 +14,7 @@ from core.models import Company, User, Backup
 from core.permission import IsSuperUser
 from core.serializers import CompanySerializer, UserSerializer, AdminUserSerializer, BackupSerializer
 from core.couch import sanitize_database_name, generate_secure_password, create_couchdb_database, create_couchdb_user, \
-    delete_couchdb_database, backup_all_databases, backup_database
+    delete_couchdb_database, backup_all_databases, backup_database, restore_database
 
 
 class CompanyViewSet(ModelViewSet):
@@ -136,6 +140,7 @@ class BackupViewSet(ModelViewSet):
                         continue
                     except Exception as e:
                         raise Exception(f"Error saving backup: {e}")
+            return Response({"message": "Backup created successfully."}, status=status.HTTP_201_CREATED)
         except Exception as e:
             raise Exception(f"Error creating backup: {e}")
 
@@ -144,3 +149,15 @@ class BackupViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         raise Exception("Backups cannot be updated.")
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def restore(self, request, pk=None):
+
+        backup = get_object_or_404(Backup, pk=pk)
+
+        try:
+            if backup.company:
+                restore_database(backup.path, backup.company.name)
+                return Response({"message": "Database restored successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": f"Error restoring database: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
