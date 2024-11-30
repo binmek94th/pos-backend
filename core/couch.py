@@ -1,12 +1,17 @@
+import json
+import os
 import secrets
 import string
 import re
+from datetime import datetime
+import shutil
 import requests
 from django.conf import settings
 
 COUCHDB_URL = settings.COUCHDB_URL
 ADMIN_USER = settings.ADMIN_USER
 ADMIN_PASSWORD = settings.ADMIN_PASSWORD
+BACKUP_DIR = 'backups'
 
 
 def sanitize_database_name(name):
@@ -86,3 +91,71 @@ def delete_couchdb_database(database_name):
         print(f"Database '{sanitized_name}' does not exist.")
     else:
         print(f"Error deleting database '{sanitized_name}': {response.text}")
+
+
+def get_all_databases():
+    response = requests.get(f"{COUCHDB_URL}/_all_dbs", auth=(ADMIN_USER, ADMIN_PASSWORD))
+    response.raise_for_status()
+    return response.json()
+
+
+def backup_database(db_name):
+    url = f"{COUCHDB_URL}/{db_name}/_all_docs?include_docs=true"
+    response = requests.get(url, auth=(ADMIN_USER, ADMIN_PASSWORD))
+    response.raise_for_status()
+    data = response.json()
+
+    single_backup_dir = os.path.join(BACKUP_DIR, "single-backups")
+    os.makedirs(single_backup_dir, exist_ok=True)
+
+    backup_file = os.path.join(single_backup_dir, f"{db_name}.json")
+    with open(backup_file, 'w') as f:
+        json.dump(data, f, indent=4)
+
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    compressed_file = shutil.make_archive(
+        os.path.join(single_backup_dir, f"{db_name}_{timestamp}"),
+        'zip',
+        single_backup_dir,
+        f"{db_name}.json"
+    )
+
+    os.remove(backup_file)
+
+    return compressed_file
+
+
+def backup_all_databases():
+    databases = get_all_databases()
+
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    dated_backup_dir = os.path.join(BACKUP_DIR, "all", timestamp)
+    os.makedirs(dated_backup_dir, exist_ok=True)
+
+    for db_name in databases:
+        try:
+            url = f"{COUCHDB_URL}/{db_name}/_all_docs?include_docs=true"
+            response = requests.get(url, auth=(ADMIN_USER, ADMIN_PASSWORD))
+            response.raise_for_status()
+            data = response.json()
+
+            backup_file = os.path.join(dated_backup_dir, f"{db_name}.json")
+            with open(backup_file, 'w') as f:
+                json.dump(data, f, indent=4)
+
+            compressed_file = shutil.make_archive(
+                os.path.join(dated_backup_dir, f"{db_name}"),
+                'zip',
+                dated_backup_dir,
+                f"{db_name}.json"
+            )
+
+            os.remove(backup_file)
+
+        except requests.exceptions.RequestException as e:
+            print(f"Error backing up database '{db_name}': {e}")
+        except Exception as e:
+            print(f"Unexpected error for database '{db_name}': {e}")
+
+    return dated_backup_dir
+

@@ -1,12 +1,16 @@
+from django.contrib.sites import requests
 from django.db import transaction
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from core.boilerplate import initialize_superuser, initialize_permissions
 from core.models import Company, User
 from core.permission import IsSuperUser
 from core.serializers import CompanySerializer, UserSerializer, AdminUserSerializer
 from core.couch import sanitize_database_name, generate_secure_password, create_couchdb_database, create_couchdb_user, \
-    delete_couchdb_database
+    delete_couchdb_database, backup_all_databases, backup_database
 
 
 class CompanyViewSet(ModelViewSet):
@@ -96,3 +100,20 @@ class UserViewSet(ModelViewSet):
         if 'password' in self.request.data:
             user.set_password(self.request.data['password'])
             user.save()
+
+
+class BackupCouchDBView(APIView):
+    def post(self, request, *args, **kwargs):
+        db_name = request.data.get('db_name')
+
+        try:
+            if db_name:
+                backup_file = backup_database(db_name)
+                return Response({"message": f"Database '{db_name}' backed up.", "backup_file": backup_file},
+                                status=status.HTTP_200_OK)
+            else:
+                backups = backup_all_databases()
+                return Response({"message": "All databases backed up.", "backups": backups}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": "An unexpected error occurred.", "details": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
