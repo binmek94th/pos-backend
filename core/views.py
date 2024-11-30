@@ -39,7 +39,9 @@ class CompanyViewSet(ModelViewSet):
                 database_user = f'{database_name}_user'
                 database_password = generate_secure_password()
 
-                company_instance = serializer.save()
+                company_instance = serializer.save(
+                    name=database_name,
+                )
 
                 company_instance.database_name = database_name
                 company_instance.database_user = database_user
