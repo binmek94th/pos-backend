@@ -19,19 +19,19 @@ from django.contrib import admin
 from rest_framework import routers
 from django.urls import path, include
 
-from core.couch import list_backups
-from core.views import CompanyViewSet, UserViewSet, BackupCouchDBView
+from core.views import CompanyViewSet, UserViewSet, BackupViewSet
 
 router = routers.DefaultRouter()
 router.register('company', CompanyViewSet)
 router.register('user', UserViewSet)
+router.register('backup', BackupViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
-    path('backup/', BackupCouchDBView.as_view(), name='backup_couchdb'),
-    path('backup-list/', list_backups, name='list_backups'),
+    # path('backup/', BackupCouchDBView.as_view(), name='backup_couchdb'),
+    # path('backup-list/', list_backups, name='list_backups'),
 
 ]
 

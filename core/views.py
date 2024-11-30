@@ -6,9 +6,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from core.boilerplate import initialize_superuser, initialize_permissions
-from core.models import Company, User
+from core.models import Company, User, Backup
 from core.permission import IsSuperUser
-from core.serializers import CompanySerializer, UserSerializer, AdminUserSerializer
+from core.serializers import CompanySerializer, UserSerializer, AdminUserSerializer, BackupSerializer
 from core.couch import sanitize_database_name, generate_secure_password, create_couchdb_database, create_couchdb_user, \
     delete_couchdb_database, backup_all_databases, backup_database
 
@@ -102,18 +102,45 @@ class UserViewSet(ModelViewSet):
             user.save()
 
 
-class BackupCouchDBView(APIView):
-    def post(self, request, *args, **kwargs):
-        db_name = request.data.get('db_name')
+class BackupViewSet(ModelViewSet):
+    queryset = Backup.objects.all()
+    serializer_class = BackupSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            Backup.objects.all()
+            return Backup.objects.all()
+        company = self.request.user.company_id
+        if company:
+            return Backup.objects.filter(company_id=company)
+        return Backup.objects.none()
+
+    def perform_create(self, serializer):
         try:
-            if db_name:
-                backup_file = backup_database(db_name)
-                return Response({"message": f"Database '{db_name}' backed up.", "backup_file": backup_file},
-                                status=status.HTTP_200_OK)
+            db = serializer.validated_data.get('database')
+            if db:
+                backup_file = backup_database(db)
+                company = Company.objects.get(name=db)
+                Backup.objects.create(path=backup_file, database=db, company=company)
             else:
                 backups = backup_all_databases()
-                return Response({"message": "All databases backed up.", "backups": backups}, status=status.HTTP_200_OK)
+                for backup in backups:
+                    try:
+                        if backup['database_name'] == '_replicator' or backup['database_name'] == '_users':
+                            Backup.objects.create(path=backup['path'], database=backup['database_name'])
+                            continue
+                        company = Company.objects.get(name=backup['database_name'])
+                        Backup.objects.create(path=backup['path'], database=backup['database_name'], company=company)
+                    except Company.DoesNotExist:
+                        continue
+                    except Exception as e:
+                        raise Exception(f"Error saving backup: {e}")
         except Exception as e:
-            return Response({"error": "An unexpected error occurred.", "details": str(e)},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            raise Exception(f"Error creating backup: {e}")
+
+    def perform_destroy(self, instance):
+        raise Exception("Backups cannot be deleted.")
+
+    def perform_update(self, serializer):
+        raise Exception("Backups cannot be updated.")
