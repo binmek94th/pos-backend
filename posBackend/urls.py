@@ -18,6 +18,8 @@ Including another URLconf
 from django.contrib import admin
 from rest_framework import routers
 from django.urls import path, include
+
+from core.couch import list_backups
 from core.views import CompanyViewSet, UserViewSet, BackupCouchDBView
 
 router = routers.DefaultRouter()
@@ -29,6 +31,7 @@ urlpatterns = [
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
     path('backup/', BackupCouchDBView.as_view(), name='backup_couchdb'),
+    path('backup-list/', list_backups, name='list_backups'),
 
 ]
 

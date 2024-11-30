@@ -7,6 +7,7 @@ from datetime import datetime
 import shutil
 import requests
 from django.conf import settings
+from django.http import JsonResponse
 
 COUCHDB_URL = settings.COUCHDB_URL
 ADMIN_USER = settings.ADMIN_USER
@@ -105,18 +106,20 @@ def backup_database(db_name):
     response.raise_for_status()
     data = response.json()
 
-    single_backup_dir = os.path.join(BACKUP_DIR, "single-backups")
-    os.makedirs(single_backup_dir, exist_ok=True)
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
-    backup_file = os.path.join(single_backup_dir, f"{db_name}.json")
+    backup_dir = os.path.join(BACKUP_DIR, "single-backups", timestamp)
+    os.makedirs(backup_dir, exist_ok=True)
+
+    backup_file = os.path.join(backup_dir, f"{db_name}.json")
+
     with open(backup_file, 'w') as f:
         json.dump(data, f, indent=4)
 
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     compressed_file = shutil.make_archive(
-        os.path.join(single_backup_dir, f"{db_name}_{timestamp}"),
+        os.path.join(backup_dir, f"{db_name}"),
         'zip',
-        single_backup_dir,
+        backup_dir,
         f"{db_name}.json"
     )
 
@@ -159,3 +162,44 @@ def backup_all_databases():
 
     return dated_backup_dir
 
+
+def get_backup_files_from_dir(directory):
+    dated_backups = []
+    for dated_folder in os.listdir(directory):
+        folder_path = os.path.join(directory, dated_folder)
+        if os.path.isdir(folder_path):
+            backup_files = [
+                f for f in os.listdir(folder_path) if f.endswith('.zip')
+            ]
+            for backup_file in backup_files:
+                formatted_date = format_date(dated_folder)
+                dated_backups.append({
+                    'date': formatted_date,
+                    'backups': backup_file
+                })
+    return dated_backups
+
+
+def list_backups(request):
+    try:
+        single_backup_dir = os.path.join(BACKUP_DIR, "single-backups")
+        all_backup_dir = os.path.join(BACKUP_DIR, "all")
+
+        single_backups = get_backup_files_from_dir(single_backup_dir)
+        all_backups = get_backup_files_from_dir(all_backup_dir)
+
+        all_backups_combined = single_backups + all_backups
+
+        return JsonResponse(all_backups_combined, safe=False)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def format_date(date_string):
+
+    try:
+        parsed_date = datetime.strptime(date_string, "%Y%m%d_%H%M%S")
+        return parsed_date.strftime("%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return date_string
