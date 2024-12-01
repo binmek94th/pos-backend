@@ -25,6 +25,7 @@ initial_permissions = [
     {'name': 'Inventory_category', 'type': 'permission', 'is_active': False, 'permission_id': 17},
     {'name': 'Inventory_product', 'type': 'permission', 'is_active': False, 'permission_id': 18},
     {'name': 'Printer', 'type': 'permission', 'is_active': False, 'permission_id': 19},
+    {'name': 'Setting', 'type': 'permission', 'is_active': False, 'permission_id': 20},
 ]
 
 initial_settings = [
