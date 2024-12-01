@@ -30,3 +30,4 @@ class Backup(models.Model):
     company = models.ForeignKey('Company', on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateField(auto_now_add=True)
     path = models.CharField(max_length=255)
+    description = models.CharField(max_length=255, null=True, blank=True)

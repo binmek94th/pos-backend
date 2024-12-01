@@ -109,13 +109,16 @@ class UserViewSet(ModelViewSet):
 class BackupViewSet(ModelViewSet):
     queryset = Backup.objects.all()
     serializer_class = BackupSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        if not self.request.user:
+            return Response({"error": "You are not authorized to view backups."}, status=status.HTTP_403_FORBIDDEN)
         if self.request.user.is_superuser:
             Backup.objects.all()
             return Backup.objects.all()
-        company = self.request.user.company_id
+        user = User.objects.get(self.request.user)
+        company = Company.objects.get(id=user.company_id)
+
         if company:
             return Backup.objects.filter(company_id=company)
         return Backup.objects.none()
@@ -128,6 +131,9 @@ class BackupViewSet(ModelViewSet):
                 company = Company.objects.get(name=db)
                 Backup.objects.create(path=backup_file, database=db, company=company)
             else:
+                user = self.request.user
+                if not user.is_superuser:
+                    return Response({"error": "You are not authorized to create a backup."}, status=status.HTTP_403_FORBIDDEN)
                 backups = backup_all_databases()
                 for backup in backups:
                     try:
