@@ -1,3 +1,5 @@
+from sys import int_info
+
 import requests
 from uuid import uuid4
 import bcrypt
@@ -25,7 +27,25 @@ initial_permissions = [
     {'name': 'Printer', 'type': 'permission', 'is_active': False, 'permission_id': 19},
 ]
 
+initial_settings = [
+    {'name': 'Waiter', 'value': False},
+    {'name': 'Customer', 'value': False},
+    {'name': 'Inventory', 'value': False},
+    ]
+
 COUCHDB_URL = settings.COUCHDB_URL
+
+
+def initialize_settings(db_name):
+    bulk_data = [
+        {**setting, '_id': f"setting_{uuid4()}"} for setting in initial_settings
+    ]
+
+    response = requests.post(f"{COUCHDB_URL}{db_name}/_bulk_docs", json={"docs": bulk_data})
+    if response.status_code != 201:
+        raise Exception(f"Error creating setting documents: {response.text}")
+
+    print("Settings initialized in CouchDB.")
 
 
 def initialize_permissions(db_name):

@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-from core.boilerplate import initialize_superuser, initialize_permissions
+from core.boilerplate import initialize_superuser, initialize_permissions, initialize_settings
 from core.models import Company, User, Backup
 from core.permission import IsSuperUser
 from core.serializers import CompanySerializer, UserSerializer, AdminUserSerializer, BackupSerializer
@@ -60,6 +60,7 @@ class CompanyViewSet(ModelViewSet):
                     create_couchdb_user(database_user, database_password)
                     initialize_permissions(company_instance.database_name)
                     initialize_superuser(company_instance.database_name)
+                    initialize_settings(company_instance.database_name)
 
     def perform_destroy(self, instance):
         database_name = sanitize_database_name(instance.name)
