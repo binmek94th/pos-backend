@@ -1,5 +1,3 @@
-from sys import int_info
-
 import requests
 from uuid import uuid4
 import bcrypt
