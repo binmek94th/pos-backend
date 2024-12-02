@@ -28,6 +28,6 @@ class Backup(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     database = models.CharField(max_length=255, blank=True)
     company = models.ForeignKey('Company', on_delete=models.CASCADE, null=True, blank=True)
-    created_at = models.DateField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     path = models.CharField(max_length=255)
     description = models.CharField(max_length=255, null=True, blank=True)
