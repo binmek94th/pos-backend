@@ -234,6 +234,26 @@ def delete_and_recreate_database(db_name):
     create_url = f"{COUCHDB_URL}/{db_name}"
     create_response = requests.put(create_url, auth=(ADMIN_USER, ADMIN_PASSWORD))
 
+    if create_response.status_code == 201:
+        database_user = f'{db_name}_user'
+        security_doc = {
+            "admins": {
+                "names": [database_user],
+                "roles": []
+            },
+            "members": {
+                "names": [database_user],
+                "roles": []
+            }
+        }
+
+        security_url = f"{COUCHDB_URL}{db_name}/_security"
+        security_response = requests.put(security_url, json=security_doc, auth=(ADMIN_USER, ADMIN_PASSWORD))
+
+        if security_response.status_code == 200:
+            print(f"Security for database '{db_name}' set for user '{database_user}'.")
+            return True
+
     if create_response.status_code != 201:
         raise Exception(f"Failed to recreate database {db_name}: {create_response.text}")
 

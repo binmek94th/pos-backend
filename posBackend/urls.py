@@ -30,9 +30,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
-    # path('backup/', BackupCouchDBView.as_view(), name='backup_couchdb'),
-    # path('backup-list/', list_backups, name='list_backups'),
-
 ]
 
 
