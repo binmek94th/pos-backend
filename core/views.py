@@ -1,13 +1,9 @@
-import os
-
-from django.contrib.sites import requests
 from django.db import transaction
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from core.boilerplate import initialize_superuser, initialize_permissions, initialize_settings
 from core.models import Company, User, Backup
@@ -110,6 +106,7 @@ class UserViewSet(ModelViewSet):
 class BackupViewSet(ModelViewSet):
     queryset = Backup.objects.all()
     serializer_class = BackupSerializer
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         if not self.request.user:
@@ -127,10 +124,11 @@ class BackupViewSet(ModelViewSet):
     def perform_create(self, serializer):
         try:
             db = serializer.validated_data.get('database')
+            description = serializer.validated_data.get('description')
             if db:
                 backup_file = backup_database(db)
                 company = Company.objects.get(name=db)
-                Backup.objects.create(path=backup_file, database=db, company=company)
+                Backup.objects.create(path=backup_file, database=db, company=company, description=description)
             else:
                 user = self.request.user
                 if not user.is_superuser:
@@ -142,7 +140,7 @@ class BackupViewSet(ModelViewSet):
                             Backup.objects.create(path=backup['path'], database=backup['database_name'])
                             continue
                         company = Company.objects.get(name=backup['database_name'])
-                        Backup.objects.create(path=backup['path'], database=backup['database_name'], company=company)
+                        Backup.objects.create(path=backup['path'], database=backup['database_name'], company=company, description=backup['description'])
                     except Company.DoesNotExist:
                         continue
                     except Exception as e:
