@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.10
+FROM python:3.10-slim
 
 # Set working directory
 WORKDIR /app
@@ -7,7 +7,10 @@ WORKDIR /app
 # Copy project files
 COPY . /app
 
-# Install dependencies
+# Install system dependencies
+RUN apt-get update && apt-get install -y sqlite3 && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Expose the port the app runs on
