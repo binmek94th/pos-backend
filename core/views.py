@@ -143,7 +143,8 @@ class BackupViewSet(ModelViewSet):
                             Backup.objects.create(path=backup['path'], database=backup['database_name'])
                             continue
                         company = Company.objects.get(name=backup['database_name'])
-                        Backup.objects.create(path=backup['path'], database=backup['database_name'], company=company, description=backup['description'])
+                        Backup.objects.create(path=backup['path'], database=backup['database_name'],
+                                              company=company, description=description)
                     except Company.DoesNotExist:
                         continue
                     except Exception as e:
