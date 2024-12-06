@@ -59,6 +59,30 @@ def create_couchdb_database(database_name, database_user):
         raise Exception(f"Failed to create database '{sanitized_name}': {response.text}")
 
 
+def create_index(database_name):
+    index_doc = {
+        "index": {
+            "fields": ["type", "created_at", "location._id"]
+        },
+        "name": "index1",
+        "type": "json"
+    }
+
+    response = requests.post(
+        f"{COUCHDB_URL}/{database_name}/_index",
+        json=index_doc,
+        auth=(ADMIN_USER, ADMIN_PASSWORD)
+    )
+
+    if response.status_code == 200 or response.status_code == 201:
+        response_data = response.json()
+        print("Index created successfully.")
+        return response_data.get('id')
+    else:
+        print(f"Error creating index: {response.status_code} - {response.text}")
+        return None
+
+
 def create_couchdb_user(database_user, database_password):
     users_url = f"{COUCHDB_URL}_users"
 

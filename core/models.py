@@ -19,6 +19,7 @@ class Company(models.Model):
     database_user = models.CharField(max_length=255)
     database_password = models.CharField(max_length=255)
     type = models.CharField(max_length=255, choices=Type.choices, default=Type.ON_PREMISE)
+    index = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.name

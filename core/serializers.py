@@ -7,7 +7,7 @@ class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = '__all__'
-        read_only_fields = ['database_user', 'database_password']
+        read_only_fields = ['database_user', 'database_password', 'index']
 
 
 class UserSerializer(BaseUserCreateSerializer):

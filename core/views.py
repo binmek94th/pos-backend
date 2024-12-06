@@ -10,7 +10,7 @@ from core.models import Company, User, Backup
 from core.permission import IsSuperUser
 from core.serializers import CompanySerializer, UserSerializer, AdminUserSerializer, BackupSerializer
 from core.couch import sanitize_database_name, generate_secure_password, create_couchdb_database, create_couchdb_user, \
-    delete_couchdb_database, backup_all_databases, backup_database, restore_database
+    delete_couchdb_database, backup_all_databases, backup_database, restore_database, create_index
 
 
 class CompanyViewSet(ModelViewSet):
@@ -50,13 +50,16 @@ class CompanyViewSet(ModelViewSet):
                 company_instance.database_name = database_name
                 company_instance.database_user = database_user
                 company_instance.database_password = database_password
-                company_instance.save()
 
                 if create_couchdb_database(database_name, database_user):
+                    index_id = create_index(database_name)
+                    company_instance.index = index_id
                     create_couchdb_user(database_user, database_password)
                     initialize_permissions(company_instance.database_name)
                     initialize_superuser(company_instance.database_name)
                     initialize_settings(company_instance.database_name)
+                company_instance.save()
+                return company_instance
 
     def perform_destroy(self, instance):
         database_name = sanitize_database_name(instance.name)
