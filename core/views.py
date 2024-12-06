@@ -140,7 +140,7 @@ class BackupViewSet(ModelViewSet):
                 for backup in backups:
                     try:
                         if backup['database_name'] == '_replicator' or backup['database_name'] == '_users':
-                            Backup.objects.create(path=backup['path'], database=backup['database_name'])
+                            Backup.objects.create(path=backup['path'], database=backup['database_name'], description=description)
                             continue
                         company = Company.objects.get(name=backup['database_name'])
                         Backup.objects.create(path=backup['path'], database=backup['database_name'],
